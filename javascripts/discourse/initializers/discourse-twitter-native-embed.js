@@ -82,10 +82,19 @@ export default {
                 }
             }
 
-            // Is the forum currently shown in a dark colour scheme? Looks at the real
-            // background colour, so it works with any theme / colour scheme.
+            // Is the forum currently shown in a dark colour scheme? Discourse's colour
+            // schemes set the custom property --scheme-type to "light" or "dark"; if it
+            // is missing (older versions, unusual themes) we judge by the background colour.
             function isDarkPage() {
                 try {
+                    for (const node of [document.body, document.documentElement]) {
+                        if (!node) continue;
+                        const type = window.getComputedStyle(node)
+                            .getPropertyValue("--scheme-type")
+                            .replace(/["'\s]/g, "");
+                        if (type === "dark") return true;
+                        if (type === "light") return false;
+                    }
                     for (const node of [document.body, document.documentElement]) {
                         if (!node) continue;
                         const bg = window.getComputedStyle(node).backgroundColor || "";
@@ -218,6 +227,8 @@ export default {
                     console.warn("discourse-twitter-native-embed: skipped a post due to an error", err);
                 }
             }, {
+                // Current Discourse only looks at onlyStream; id and afterAdopt are ignored
+                // there but kept because older Discourse versions may still use them.
                 id: "discourse-twitter-native-embed",
                 afterAdopt: true,
                 onlyStream: true,
