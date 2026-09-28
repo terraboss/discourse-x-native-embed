@@ -1,12 +1,17 @@
 # Discourse X Native Embed
 
-Fork of [Lhcfl/discourse-twitter-native-embed](https://github.com/Lhcfl/discourse-twitter-native-embed) — a Discourse theme component that converts oneboxed X/Twitter links into native embeds (with images, video, like/retweet counts) using X's `widgets.js`.
+Fork of [Lhcfl/discourse-twitter-native-embed](https://github.com/Lhcfl/discourse-twitter-native-embed) — a Discourse theme component that converts X/Twitter links into native embeds (with images, video, like/reply counts) using X's `widgets.js`.
 
 **Status:** Experimental. Use at your own risk.
 
 ## Why this fork exists
 
-The upstream component would throw an uncaught error and trigger Discourse's safe-mode warning banner whenever a post's X/Twitter onebox didn't carry the expected `data-onebox-src` attribute (e.g. due to X's ongoing API/embed instability). This fork hardens the decorator against that and a few related issues.
+The upstream component could throw an uncaught error and trigger Discourse's safe-mode warning banner ("one of the post decorators on your site threw an error"). The most likely trigger is a post whose X/Twitter onebox does not carry the expected `data-onebox-src` attribute (e.g. because of X's ongoing API/embed instability). This has not been confirmed with a captured stack trace. The fork guards the decorator against that case and fixes a few related issues.
+
+## How it works
+
+- `javascripts/discourse/initializers/discourse-twitter-native-embed.js` finds X/Twitter status links, oneboxes and quoted tweets in each rendered post, adds a hidden `blockquote.twitter-tweet` for each, and lets X's `widgets.js` turn it into the native embed.
+- `common/common.scss` hides the plain link in front of an embedded tweet, but only after the tweet has actually rendered. If `widgets.js` is blocked or fails to load, the link stays visible as a fallback.
 
 ## Installation
 
@@ -19,15 +24,17 @@ The upstream component would throw an uncaught error and trigger Discourse's saf
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
-### [Unreleased]
-- Fix: quoted-tweet detection now also matches `x.com` links (previously only `twitter.com`)
-- Fix: tightened onebox link selector to `[href*="/status/"]` to avoid false matches on unrelated links containing the word "status"
-- Add: `data-dnt="true"` on generated `blockquote.twitter-tweet` elements to request Do-Not-Track behavior from X's embed script (privacy/GDPR)
-- Refactor: extracted shared `makeTweetBlockquote()` helper to remove duplication across the three embed code paths
+### 2026-09-28
+- **Change:** the plain link in front of an embedded tweet is now hidden via `common/common.scss`, but only once the tweet has rendered (falls back to showing the link if `widgets.js` is blocked or fails). The tweet blockquote is now inserted next to the link instead of inside it.
+- **Fix:** already-decorated links are marked with `data-x-embed` to avoid duplicate embeds on re-render
+- **Fix:** quoted-tweet detection now also matches `x.com` links (previously only `twitter.com`)
+- **Fix:** tightened the onebox link selector to `[href*="/status/"]` to avoid false matches on unrelated links containing the word "status"
+- **Add:** `data-dnt="true"` on generated `blockquote.twitter-tweet` elements to request Do-Not-Track behavior from X's embed script (privacy/GDPR)
+- **Refactor:** extracted shared `makeTweetBlockquote()` helper to remove duplication across the embed code paths
 
 ### 2026-09-27
 - **Fix:** wrapped the entire `decorateCookedElement` callback in try/catch so a single malformed post can no longer crash the decorator pipeline and trigger Discourse's safe-mode banner
-- **Fix:** guarded `data-onebox-src` attribute access — this was the confirmed root cause of the safe-mode errors (`.replaceAll()` was called on a `null` value when the attribute was missing)
+- **Fix:** guarded `data-onebox-src` attribute access — this is the most likely root cause of the safe-mode errors (`.replaceAll()` was called on a `null` value when the attribute was missing); not yet confirmed via a captured console stack trace
 - **Fix:** prevented `widgets.js` from being appended to `<head>` more than once in parallel; added a loading-state guard
 - **Fix:** when `widgets.js` is already loaded, newly rendered posts (e.g. from infinite scroll) are now re-scanned via `window.twttr.widgets.load(el)` instead of being silently skipped
 - **Chore:** updated `LICENSE` copyright line
