@@ -6,7 +6,7 @@ Fork of [Lhcfl/discourse-twitter-native-embed](https://github.com/Lhcfl/discours
 
 ## Why this fork exists
 
-The upstream component could throw an uncaught error and trigger Discourse's safe-mode warning banner ("one of the post decorators on your site threw an error"). The most likely trigger is a post whose X/Twitter onebox does not carry the expected `data-onebox-src` attribute (e.g. because of X's ongoing API/embed instability). This has not been confirmed with a captured stack trace. The fork guards the decorator against that case and fixes a few related issues.
+The upstream component could throw an error while a post was being displayed. Discourse catches such errors and shows administrators a warning banner ("one of the post decorators on your site raised an error") with a link to safe mode; the forum itself is not switched into safe mode, but the tweet in that post is not embedded. The most likely trigger is a post whose X/Twitter onebox does not carry the expected `data-onebox-src` attribute (e.g. because of X's ongoing API/embed instability). This has not been confirmed with a captured stack trace. The fork guards the decorator against that case and fixes a few related issues.
 
 ## How it works
 
@@ -38,7 +38,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/), written 
 - **Refactor:** Code tidied up, no visible change.
 
 ### 2026-09-27
-- **Fix:** One problematic post can no longer push the whole forum into Discourse's "safe mode".
+- **Fix:** One problematic post no longer triggers Discourse's administrator warning banner about a broken post decorator.
 - **Fix:** The most likely cause of those errors: the code assumed a piece of information was always there and crashed when it was missing. It now checks first. This is our best guess and has not been confirmed.
 - **Fix:** X's script is loaded once instead of over and over.
 - **Fix:** Posts that appear while you scroll now get their tweets too.
