@@ -24,20 +24,17 @@ The upstream component could throw an uncaught error and trigger Discourse's saf
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
-### [Unreleased]
-- **Fix:** tweet-blockquote detection is stricter: only blockquotes that *end* with a link to a tweet (X's own embed HTML) are treated as embedded tweets; Discourse's quote boxes (`aside.quote`) and ordinary quotes that merely mention a tweet are left alone. Previously any blockquote containing a twitter.com/x.com link was marked
-- **Fix:** loading `widgets.js` is retried at most three times (e.g. when an ad blocker blocks it), and failed script tags are removed, instead of retrying for every post on the page
-- **Add:** bare X/Twitter status links that Discourse did not onebox are now embedded too, if the link stands alone in its paragraph with the URL as link text (links inside sentences and `[text](url)` links are left alone); also recognises `www.` and `mobile.` hosts
-- **Change:** the onebox card's own content is now hidden by `common/common.scss` only once the tweet has rendered (previously hidden immediately by script, which left an empty post if `widgets.js` failed)
-- **Add:** embeds use X's dark theme (`data-theme="dark"`) when the forum is displayed with a dark colour scheme
-- **Add:** placeholder space (`$x-embed-placeholder-height` in `common.scss`) is reserved while a tweet loads to reduce layout jumps; it is released again after 10 seconds if nothing rendered
-
 ### 2026-09-28
-- **Change:** the plain link in front of an embedded tweet is now hidden via `common/common.scss`, but only once the tweet has rendered (falls back to showing the link if `widgets.js` is blocked or fails). The tweet blockquote is now inserted next to the link instead of inside it.
-- **Fix:** already-decorated links are marked with `data-x-embed` to avoid duplicate embeds on re-render
-- **Fix:** quoted-tweet detection now also matches `x.com` links (previously only `twitter.com`)
-- **Fix:** tightened the onebox link selector to `[href*="/status/"]` to avoid false matches on unrelated links containing the word "status"
+- **Add:** bare X/Twitter status links that Discourse did not onebox are now embedded too, if the link stands alone in its paragraph with the URL as link text (links inside sentences and `[text](url)` links are left alone); `www.` and `mobile.` hosts are recognised
+- **Add:** embeds use X's dark theme (`data-theme="dark"`) when the forum is displayed with a dark colour scheme
 - **Add:** `data-dnt="true"` on generated `blockquote.twitter-tweet` elements to request Do-Not-Track behavior from X's embed script (privacy/GDPR)
+- **Add:** placeholder space (`$x-embed-placeholder-height` in `common.scss`) is reserved while a tweet loads to reduce layout jumps; it is released again after 10 seconds if nothing rendered
+- **Change:** the plain link in front of an embedded tweet is now hidden via `common/common.scss`, but only once the tweet has rendered (falls back to showing the link if `widgets.js` is blocked or fails). The tweet blockquote is now inserted next to the link instead of inside it
+- **Change:** the onebox card's own content is hidden by `common/common.scss` only once the tweet has rendered (previously hidden immediately by script, which left an empty post if `widgets.js` failed)
+- **Fix:** tweet-blockquote detection is stricter: only blockquotes that *end* with a link to a tweet (`twitter.com` or `x.com`, i.e. X's own embed HTML) are treated as embedded tweets; Discourse's quote boxes (`aside.quote`) and ordinary quotes that merely mention a tweet are left alone
+- **Fix:** loading `widgets.js` is retried at most three times (e.g. when an ad blocker blocks it), and failed script tags are removed, instead of retrying for every post on the page
+- **Fix:** link matching now requires a real status URL (`/<user>/status/<id>`) on a known host, avoiding false matches on unrelated links containing the word "status"
+- **Fix:** already-decorated links and cards are marked with `data-x-embed` to avoid duplicate embeds on re-render
 - **Refactor:** extracted shared `makeTweetBlockquote()` helper to remove duplication across the embed code paths
 
 ### 2026-09-27
