@@ -1,6 +1,25 @@
-// Hide the plain link in front of an embedded tweet, but only once the tweet
-// has actually rendered. If X's widgets.js is blocked or fails to load, the
-// link stays visible as a fallback instead of leaving an empty post.
-a.onebox[data-x-embed]:has(+ .twitter-tweet-rendered) {
+// Height reserved for a tweet while it is loading, to reduce the layout jump
+// when it appears. Tweets vary in height; adjust to taste.
+$x-embed-placeholder-height: 12rem;
+
+// 1) Hide the plain link once the tweet next to it has actually rendered.
+//    If X's widgets.js is blocked or fails to load, the link stays visible.
+a[data-x-embed]:has(+ .twitter-tweet-rendered) {
   display: none;
+}
+
+// 2) While the tweet is loading, reserve some space so the page jumps less.
+//    The script sets data-x-embed-stalled if nothing rendered after a while,
+//    which releases the reserved space again.
+a[data-x-embed]:not([data-x-embed-stalled]):not(:has(+ .twitter-tweet-rendered)) {
+  display: block;
+  min-height: $x-embed-placeholder-height;
+}
+
+// 3) Full onebox card: hide the card's own content once the tweet has rendered.
+aside.onebox.twitterstatus[data-x-embed]:has(.twitter-tweet-rendered) {
+  header.source,
+  article.onebox-body {
+    display: none;
+  }
 }
