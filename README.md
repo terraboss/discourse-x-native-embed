@@ -10,8 +10,8 @@ The upstream component could throw an uncaught error and trigger Discourse's saf
 
 ## How it works
 
-- `javascripts/discourse/initializers/discourse-twitter-native-embed.js` finds X/Twitter status links, oneboxes and quoted tweets in each rendered post, adds a hidden `blockquote.twitter-tweet` for each, and lets X's `widgets.js` turn it into the native embed.
-- `common/common.scss` hides the plain link in front of an embedded tweet, but only after the tweet has actually rendered. If `widgets.js` is blocked or fails to load, the link stays visible as a fallback.
+- `javascripts/discourse/initializers/discourse-twitter-native-embed.js` finds X/Twitter status links (oneboxed, bare, or in onebox cards) and quoted tweets in each rendered post, adds a hidden `blockquote.twitter-tweet` for each, and lets X's `widgets.js` turn it into the native embed. The embed follows the forum's light/dark colours.
+- `common/common.scss` hides the plain link (or the onebox card's own content) once the tweet has actually rendered, and reserves some space while it loads. If `widgets.js` is blocked or fails to load, the link stays visible as a fallback.
 
 ## Installation
 
@@ -23,6 +23,12 @@ The upstream component could throw an uncaught error and trigger Discourse's saf
 ## Changelog
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
+
+### [Unreleased]
+- **Add:** bare X/Twitter status links that Discourse did not onebox are now embedded too, if the link stands alone in its paragraph with the URL as link text (links inside sentences and `[text](url)` links are left alone); also recognises `www.` and `mobile.` hosts
+- **Change:** the onebox card's own content is now hidden by `common/common.scss` only once the tweet has rendered (previously hidden immediately by script, which left an empty post if `widgets.js` failed)
+- **Add:** embeds use X's dark theme (`data-theme="dark"`) when the forum is displayed with a dark colour scheme
+- **Add:** placeholder space (`$x-embed-placeholder-height` in `common.scss`) is reserved while a tweet loads to reduce layout jumps; it is released again after 10 seconds if nothing rendered
 
 ### 2026-09-28
 - **Change:** the plain link in front of an embedded tweet is now hidden via `common/common.scss`, but only once the tweet has rendered (falls back to showing the link if `widgets.js` is blocked or fails). The tweet blockquote is now inserted next to the link instead of inside it.
