@@ -25,6 +25,8 @@ The upstream component could throw an uncaught error and trigger Discourse's saf
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### [Unreleased]
+- **Fix:** tweet-blockquote detection is stricter: only blockquotes that *end* with a link to a tweet (X's own embed HTML) are treated as embedded tweets; Discourse's quote boxes (`aside.quote`) and ordinary quotes that merely mention a tweet are left alone. Previously any blockquote containing a twitter.com/x.com link was marked
+- **Fix:** loading `widgets.js` is retried at most three times (e.g. when an ad blocker blocks it), and failed script tags are removed, instead of retrying for every post on the page
 - **Add:** bare X/Twitter status links that Discourse did not onebox are now embedded too, if the link stands alone in its paragraph with the URL as link text (links inside sentences and `[text](url)` links are left alone); also recognises `www.` and `mobile.` hosts
 - **Change:** the onebox card's own content is now hidden by `common/common.scss` only once the tweet has rendered (previously hidden immediately by script, which left an empty post if `widgets.js` failed)
 - **Add:** embeds use X's dark theme (`data-theme="dark"`) when the forum is displayed with a dark colour scheme
