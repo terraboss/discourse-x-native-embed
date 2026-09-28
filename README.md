@@ -1,4 +1,4 @@
-# Discourse X Native Embed
+# Discourse 𝕏 Native Embed
 
 Fork of [Lhcfl/discourse-twitter-native-embed](https://github.com/Lhcfl/discourse-twitter-native-embed) — a Discourse theme component that converts X/Twitter links into native embeds (with images, video, like/reply counts) using X's `widgets.js`.
 
