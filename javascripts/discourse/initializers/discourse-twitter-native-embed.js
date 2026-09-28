@@ -37,25 +37,30 @@ export default {
                 }
             }
 
+            function makeTweetBlockquote(href) {
+                const blockquote = document.createElement("blockquote");
+                blockquote.setAttribute("style", "display: none");
+                blockquote.setAttribute("data-dnt", "true"); // request Do-Not-Track from X's embed script
+                blockquote.classList.add("twitter-tweet");
+                const anchor = document.createElement("a");
+                anchor.setAttribute("href", href.replaceAll("https://x.com", "https://twitter.com"));
+                anchor.setAttribute("rel", "nofollow");
+                blockquote.appendChild(anchor);
+                return blockquote;
+            }
+
             api.decorateCookedElement((el) => {
                 try {
                     let hasQuote = false;
 
                     for (const domain of ["twitter.com", "x.com"]) {
                         const links = el.querySelectorAll(
-                            `a.onebox[href^="https://${domain}/"][href*="status"]`
+                            `a.onebox[href^="https://${domain}/"][href*="/status/"]`
                         );
                         for (const link of links) {
                             if (!link || !link.href) continue;
                             if (link.querySelector("blockquote.twitter-tweet")) continue;
-                            const blockquote = document.createElement("blockquote");
-                            blockquote.setAttribute("style", "display: none");
-                            blockquote.classList.add("twitter-tweet");
-                            const anchor = document.createElement("a");
-                            anchor.setAttribute("href", link.href.replaceAll("https://x.com", "https://twitter.com"));
-                            anchor.setAttribute("rel", "nofollow");
-                            blockquote.appendChild(anchor);
-                            link.appendChild(blockquote);
+                            link.appendChild(makeTweetBlockquote(link.href));
                         }
                     }
 
@@ -65,22 +70,17 @@ export default {
                         // instead of throwing (this was the likely cause of the safe-mode errors)
                         const src = safeAttr(aside, "data-onebox-src");
                         if (!src) continue;
-                        const blockquote = document.createElement("blockquote");
-                        blockquote.setAttribute("style", "display: none");
-                        blockquote.classList.add("twitter-tweet");
-                        const anchor = document.createElement("a");
-                        anchor.setAttribute("href", src.replaceAll("https://x.com", "https://twitter.com"));
-                        anchor.setAttribute("rel", "nofollow");
-                        blockquote.appendChild(anchor);
-                        aside.appendChild(blockquote);
+                        aside.appendChild(makeTweetBlockquote(src));
                         for (const oldEl of aside.querySelectorAll("header.source, article.onebox-body")) {
                             oldEl.setAttribute("style", "display: none");
                         }
                     }
 
                     for (const quote of el.getElementsByTagName("blockquote")) {
-                        if (quote.querySelector('a[href^="https://twitter.com/"]')) {
+                        // covers both twitter.com and x.com links inside nested quotes
+                        if (quote.querySelector('a[href^="https://twitter.com/"], a[href^="https://x.com/"]')) {
                             quote.classList.add("twitter-tweet");
+                            quote.setAttribute("data-dnt", "true");
                             hasQuote = true;
                         }
                     }
