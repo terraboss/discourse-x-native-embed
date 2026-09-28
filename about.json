@@ -1,9 +1,9 @@
 {
-  "name": "Discourse X Native Embed",
+  "name": "Discourse 𝕏 Native Embed",
   "authors": "Lhc_fl, forked by terraboss",
-  "about_url": null,
+  "about_url": "https://github.com/terraboss/discourse-x-native-embed",
+  "license_url": "https://github.com/terraboss/discourse-x-native-embed/blob/main/LICENSE",
   "component": true,
-  "license_url": null,
   "assets": {},
   "color_schemes": {}
 }
