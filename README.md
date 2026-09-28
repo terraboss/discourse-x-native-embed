@@ -35,6 +35,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/), written 
 - **Fix:** If X's script is blocked (for example by an ad blocker), the forum now tries three times and then stops, instead of trying again for every post.
 - **Fix:** Only real tweet links are recognised, not any link that merely contains the word "status".
 - **Fix:** A tweet is no longer shown twice when a post is redrawn.
+- **Fix:** Dark tweets no longer have a light edge around their corners.
 - **Refactor:** Code tidied up, no visible change.
 - **Chore:** The component's info now links to the project page and the licence, and its name uses the 𝕏 symbol.
 
