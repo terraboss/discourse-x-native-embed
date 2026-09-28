@@ -23,3 +23,10 @@ aside.onebox.twitterstatus[data-x-embed]:has(.twitter-tweet-rendered) {
     display: none;
   }
 }
+
+// 4) Dark embeds: a light edge can show around the tweet's rounded corners when
+//    the page (dark) and X's frame (light) disagree about the colour scheme.
+//    Telling the browser the frame is light avoids the opaque backdrop.
+.twitter-tweet-rendered iframe {
+  color-scheme: light;
+}
