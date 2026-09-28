@@ -22,43 +22,32 @@ The upstream component could throw an uncaught error and trigger Discourse's saf
 
 ## Changelog
 
-What changed, in plain language. Newest first.
+Format loosely follows [Keep a Changelog](https://keepachangelog.com/), written in plain language.
 
 ### 2026-09-28
-
-**New**
-- Links to X posts that Discourse did not turn into a preview on its own are now shown as full tweets too, as long as the link is on a line by itself.
-- Tweets are shown in dark mode when your forum is dark.
-- Tweets ask X not to track visitors ("Do Not Track"). This is a request, not a guarantee.
-- While a tweet is loading, some space is kept free so the page jumps around less. If nothing shows up after 10 seconds, the space is given back.
-
-**Improved**
-- The plain link above a tweet now disappears once the tweet is displayed. If X cannot be reached, the link stays, so nothing gets lost. The same goes for preview cards.
-
-**Fixed**
-- Quoting a post that contains an X link no longer risks replacing your quote with the tweet. Only pasted X embed code is treated as a tweet.
-- If X's script is blocked (for example by an ad blocker), the forum now tries three times and then stops, instead of trying again for every post.
-- Only real tweet links are recognised, not any link that merely contains the word "status".
-- A tweet is no longer shown twice when a post is redrawn.
-
-**Behind the scenes**
-- Code tidied up, no visible change.
+- **Add:** X links that Discourse did not turn into a preview by itself are now shown as full tweets too, as long as the link is on a line by itself. Links inside a sentence are left alone.
+- **Add:** Tweets use dark mode when the forum is displayed in a dark colour scheme.
+- **Add:** Tweets ask X not to track visitors ("Do Not Track"). This is a request, not a guarantee.
+- **Add:** Some space is kept free while a tweet is loading, so the page jumps around less. If nothing appears after 10 seconds, the space is given back.
+- **Change:** The plain link above a tweet now disappears once the tweet is shown. If X cannot be reached, the link stays, so nothing gets lost.
+- **Change:** Preview cards work the same way: their own text is hidden only once the tweet is actually shown. Before, it was hidden right away, which could leave an empty post.
+- **Fix:** Quoting a post that contains an X link no longer risks replacing your quote with the tweet. Only pasted X embed code is treated as a tweet.
+- **Fix:** If X's script is blocked (for example by an ad blocker), the forum now tries three times and then stops, instead of trying again for every post.
+- **Fix:** Only real tweet links are recognised, not any link that merely contains the word "status".
+- **Fix:** A tweet is no longer shown twice when a post is redrawn.
+- **Refactor:** Code tidied up, no visible change.
 
 ### 2026-09-27
+- **Fix:** One problematic post can no longer push the whole forum into Discourse's "safe mode".
+- **Fix:** The most likely cause of those errors: the code assumed a piece of information was always there and crashed when it was missing. It now checks first. This is our best guess and has not been confirmed.
+- **Fix:** X's script is loaded once instead of over and over.
+- **Fix:** Posts that appear while you scroll now get their tweets too.
+- **Chore:** The licence now credits both the original author and this fork.
 
-**Fixed**
-- One problematic post can no longer push the whole forum into Discourse's "safe mode".
-- The most likely cause of those safe-mode errors: the code assumed a piece of information was always there and crashed when it was missing. It now checks first. This is our best guess and has not been confirmed.
-- X's script is loaded once instead of over and over.
-- Posts that appear while you scroll now get their tweets too.
-
-**Housekeeping**
-- The licence now credits both the original author and this fork.
-
-### Before this fork (original project by Lhcfl)
-- 2026-03-30 — Also works with X links that Discourse had already turned into previews (contributed by [communiteq](https://github.com/communiteq)).
-- 2023-08-12 — Updated for the Twitter to X rename.
-- 2023-04-15 — First release.
+### Upstream history (inherited from Lhcfl/discourse-twitter-native-embed)
+- 2026-03-30 — Also works with X links that Discourse had already turned into previews (contributed by [communiteq](https://github.com/communiteq))
+- 2023-08-12 — Updated for the Twitter to X rename
+- 2023-04-15 — First release
 
 ## License
 
