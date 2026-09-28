@@ -1,0 +1,6 @@
+// Hide the plain link in front of an embedded tweet, but only once the tweet
+// has actually rendered. If X's widgets.js is blocked or fails to load, the
+// link stays visible as a fallback instead of leaving an empty post.
+a.onebox[data-x-embed]:has(+ .twitter-tweet-rendered) {
+  display: none;
+}
