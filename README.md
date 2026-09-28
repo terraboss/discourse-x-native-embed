@@ -26,7 +26,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/), written 
 
 ### 2026-09-28
 - **Add:** X links that Discourse did not turn into a preview by itself are now shown as full tweets too, as long as the link is on a line by itself. Links inside a sentence are left alone.
-- **Add:** Tweets use dark mode when the forum is displayed in a dark colour scheme.
+- **Add:** Tweets use dark mode when the forum is displayed in a dark colour scheme. This is read from the forum's own colour scheme setting; if that is missing, the background colour is used as a fallback.
 - **Add:** Tweets ask X not to track visitors ("Do Not Track"). This is a request, not a guarantee.
 - **Add:** Some space is kept free while a tweet is loading, so the page jumps around less. If nothing appears after 10 seconds, the space is given back.
 - **Change:** The plain link above a tweet now disappears once the tweet is shown. If X cannot be reached, the link stays, so nothing gets lost.
@@ -36,6 +36,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/), written 
 - **Fix:** Only real tweet links are recognised, not any link that merely contains the word "status".
 - **Fix:** A tweet is no longer shown twice when a post is redrawn.
 - **Refactor:** Code tidied up, no visible change.
+- **Chore:** The component's info now links to the project page and the licence, and its name uses the 𝕏 symbol.
 
 ### 2026-09-27
 - **Fix:** One problematic post no longer triggers Discourse's administrator warning banner about a broken post decorator.
