@@ -13,12 +13,17 @@ const TWEET_HOSTS = [
 // stop reserving placeholder space for it and just leave the plain link.
 const STALL_TIMEOUT_MS = 10000;
 
+// If widgets.js cannot be loaded (blocked by an ad blocker, X down, ...), give up
+// after this many attempts instead of retrying for every post on the page.
+const MAX_SCRIPT_ATTEMPTS = 3;
+
 export default {
     name: "discourse-twitter-native-embed",
     initialize() {
         withPluginApi("1.0.0", (api) => {
 
             let scriptLoading = false;
+            let scriptAttempts = 0;
 
             function loadTwitterWidgets(el) {
                 // Already loaded: just re-scan the newly added element
@@ -31,14 +36,18 @@ export default {
                     }
                     return;
                 }
-                if (scriptLoading) return;
+                if (scriptLoading || scriptAttempts >= MAX_SCRIPT_ATTEMPTS) return;
                 scriptLoading = true;
+                scriptAttempts++;
                 const scriptnode = document.createElement("script");
                 scriptnode.setAttribute("async", "");
                 scriptnode.setAttribute("src", "https://platform.twitter.com/widgets.js");
                 scriptnode.setAttribute("charset", "utf-8");
                 scriptnode.onload = () => { scriptLoading = false; };
-                scriptnode.onerror = () => { scriptLoading = false; };
+                scriptnode.onerror = () => {
+                    scriptLoading = false;
+                    scriptnode.remove(); // don't leave failed script tags behind
+                };
                 document.head.appendChild(scriptnode);
             }
 
@@ -112,6 +121,20 @@ export default {
                 return true;
             }
 
+            // True if nothing but whitespace / <br> follows `link` inside `container`
+            function endsWithLink(container, link) {
+                let node = link;
+                while (node && node !== container) {
+                    for (let sib = node.nextSibling; sib; sib = sib.nextSibling) {
+                        if (sib.nodeType === 3 && !sib.textContent.trim()) continue;
+                        if (sib.nodeType === 1 && sib.tagName === "BR") continue;
+                        return false;
+                    }
+                    node = node.parentNode;
+                }
+                return true;
+            }
+
             function makeTweetBlockquote(href, dark) {
                 const blockquote = document.createElement("blockquote");
                 blockquote.setAttribute("style", "display: none");
@@ -142,7 +165,6 @@ export default {
 
             api.decorateCookedElement((el) => {
                 try {
-                    let hasQuote = false;
                     const dark = isDarkPage();
 
                     // 1) Links: oneboxed links, and bare links Discourse did not onebox
@@ -172,19 +194,22 @@ export default {
                         aside.appendChild(makeTweetBlockquote(src, dark));
                     }
 
-                    // 3) Quoted tweets (blockquotes containing a tweet link)
+                    // 3) Tweet blockquotes, i.e. X's own embed HTML pasted into a post: the
+                    //    quote must END with a link to a tweet. Discourse's own quote boxes
+                    //    (aside.quote) and ordinary quotes that merely mention a tweet are left alone.
                     for (const quote of el.getElementsByTagName("blockquote")) {
-                        if (quote.querySelector('a[href^="https://twitter.com/"], a[href^="https://x.com/"]')) {
-                            quote.classList.add("twitter-tweet");
-                            quote.setAttribute("data-dnt", "true");
-                            if (dark && !quote.hasAttribute("data-theme")) {
-                                quote.setAttribute("data-theme", "dark");
-                            }
-                            hasQuote = true;
+                        if (quote.closest("aside.quote")) continue;
+                        const links = quote.querySelectorAll("a[href]");
+                        const last = links[links.length - 1];
+                        if (!last || !isTweetUrl(last.href) || !endsWithLink(quote, last)) continue;
+                        quote.classList.add("twitter-tweet");
+                        quote.setAttribute("data-dnt", "true");
+                        if (dark && !quote.hasAttribute("data-theme")) {
+                            quote.setAttribute("data-theme", "dark");
                         }
                     }
 
-                    if (hasQuote || el.querySelector("blockquote.twitter-tweet")) {
+                    if (el.querySelector("blockquote.twitter-tweet")) {
                         loadTwitterWidgets(el);
                     }
                 } catch (err) {
