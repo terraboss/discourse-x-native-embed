@@ -59,8 +59,13 @@ export default {
                         );
                         for (const link of links) {
                             if (!link || !link.href) continue;
-                            if (link.querySelector("blockquote.twitter-tweet")) continue;
-                            link.appendChild(makeTweetBlockquote(link.href));
+                            if (link.hasAttribute("data-x-embed")) continue; // already decorated
+                            // Marker used by common/common.scss to hide the plain link
+                            // once the tweet above/below it has actually rendered.
+                            link.setAttribute("data-x-embed", "true");
+                            // Insert the tweet next to the link (not inside it), so the
+                            // link can be hidden without hiding the tweet.
+                            link.insertAdjacentElement("afterend", makeTweetBlockquote(link.href));
                         }
                     }
 
