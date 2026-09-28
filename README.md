@@ -22,32 +22,43 @@ The upstream component could throw an uncaught error and trigger Discourse's saf
 
 ## Changelog
 
-Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
+What changed, in plain language. Newest first.
 
 ### 2026-09-28
-- **Add:** bare X/Twitter status links that Discourse did not onebox are now embedded too, if the link stands alone in its paragraph with the URL as link text (links inside sentences and `[text](url)` links are left alone); `www.` and `mobile.` hosts are recognised
-- **Add:** embeds use X's dark theme (`data-theme="dark"`) when the forum is displayed with a dark colour scheme
-- **Add:** `data-dnt="true"` on generated `blockquote.twitter-tweet` elements to request Do-Not-Track behavior from X's embed script (privacy/GDPR)
-- **Add:** placeholder space (`$x-embed-placeholder-height` in `common.scss`) is reserved while a tweet loads to reduce layout jumps; it is released again after 10 seconds if nothing rendered
-- **Change:** the plain link in front of an embedded tweet is now hidden via `common/common.scss`, but only once the tweet has rendered (falls back to showing the link if `widgets.js` is blocked or fails). The tweet blockquote is now inserted next to the link instead of inside it
-- **Change:** the onebox card's own content is hidden by `common/common.scss` only once the tweet has rendered (previously hidden immediately by script, which left an empty post if `widgets.js` failed)
-- **Fix:** tweet-blockquote detection is stricter: only blockquotes that *end* with a link to a tweet (`twitter.com` or `x.com`, i.e. X's own embed HTML) are treated as embedded tweets; Discourse's quote boxes (`aside.quote`) and ordinary quotes that merely mention a tweet are left alone
-- **Fix:** loading `widgets.js` is retried at most three times (e.g. when an ad blocker blocks it), and failed script tags are removed, instead of retrying for every post on the page
-- **Fix:** link matching now requires a real status URL (`/<user>/status/<id>`) on a known host, avoiding false matches on unrelated links containing the word "status"
-- **Fix:** already-decorated links and cards are marked with `data-x-embed` to avoid duplicate embeds on re-render
-- **Refactor:** extracted shared `makeTweetBlockquote()` helper to remove duplication across the embed code paths
+
+**New**
+- Links to X posts that Discourse did not turn into a preview on its own are now shown as full tweets too, as long as the link is on a line by itself.
+- Tweets are shown in dark mode when your forum is dark.
+- Tweets ask X not to track visitors ("Do Not Track"). This is a request, not a guarantee.
+- While a tweet is loading, some space is kept free so the page jumps around less. If nothing shows up after 10 seconds, the space is given back.
+
+**Improved**
+- The plain link above a tweet now disappears once the tweet is displayed. If X cannot be reached, the link stays, so nothing gets lost. The same goes for preview cards.
+
+**Fixed**
+- Quoting a post that contains an X link no longer risks replacing your quote with the tweet. Only pasted X embed code is treated as a tweet.
+- If X's script is blocked (for example by an ad blocker), the forum now tries three times and then stops, instead of trying again for every post.
+- Only real tweet links are recognised, not any link that merely contains the word "status".
+- A tweet is no longer shown twice when a post is redrawn.
+
+**Behind the scenes**
+- Code tidied up, no visible change.
 
 ### 2026-09-27
-- **Fix:** wrapped the entire `decorateCookedElement` callback in try/catch so a single malformed post can no longer crash the decorator pipeline and trigger Discourse's safe-mode banner
-- **Fix:** guarded `data-onebox-src` attribute access — this is the most likely root cause of the safe-mode errors (`.replaceAll()` was called on a `null` value when the attribute was missing); not yet confirmed via a captured console stack trace
-- **Fix:** prevented `widgets.js` from being appended to `<head>` more than once in parallel; added a loading-state guard
-- **Fix:** when `widgets.js` is already loaded, newly rendered posts (e.g. from infinite scroll) are now re-scanned via `window.twttr.widgets.load(el)` instead of being silently skipped
-- **Chore:** updated `LICENSE` copyright line
 
-### Upstream history (inherited from Lhcfl/discourse-twitter-native-embed)
-- 2026-03-30 — Merged support for converting *existing* oneboxes (not just raw links), contributed by [communiteq](https://github.com/communiteq)
-- 2023-08-12 — Adjusted for Twitter → X domain rename (`twitter.com` → `x.com`)
-- 2023-04-15 — Initial release
+**Fixed**
+- One problematic post can no longer push the whole forum into Discourse's "safe mode".
+- The most likely cause of those safe-mode errors: the code assumed a piece of information was always there and crashed when it was missing. It now checks first. This is our best guess and has not been confirmed.
+- X's script is loaded once instead of over and over.
+- Posts that appear while you scroll now get their tweets too.
+
+**Housekeeping**
+- The licence now credits both the original author and this fork.
+
+### Before this fork (original project by Lhcfl)
+- 2026-03-30 — Also works with X links that Discourse had already turned into previews (contributed by [communiteq](https://github.com/communiteq)).
+- 2023-08-12 — Updated for the Twitter to X rename.
+- 2023-04-15 — First release.
 
 ## License
 
