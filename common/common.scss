@@ -80,6 +80,14 @@ aside.onebox.twitterstatus[data-x-embed]:has(.twitter-tweet-rendered) {
     margin: 0;
     padding: 0;
   }
+
+  // The card's own frame (border/shadow/background) comes from Discourse's
+  // generic .onebox styling on the <aside> itself, separate from the header
+  // and article hidden above — without this it stays visible behind the tweet.
+  border: none;
+  box-shadow: none;
+  background: none;
+  padding: 0;
 }
 
 // 3) Dark embeds: a light edge can show around the tweet's rounded corners when
