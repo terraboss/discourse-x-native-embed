@@ -27,6 +27,7 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/), written 
 ### [Work in progress]
 - **Change:** Reduce page jumps while a tweet loads. The old link (or onebox card) now collapses smoothly instead of vanishing abruptly, and reserves more space up front when a card already shows an image or video. In testing this made scrolling calmer but did not fix jumps caused by older posts loading in while scrolling up in long topics — that appears to be a separate, unresolved issue in Discourse itself, unrelated to this component.
 - **Fix:** A collapsed link no longer leaves an empty gap behind.
+- **Add:** A tweet's height is now remembered once it has rendered. If Discourse later removes and rebuilds the post (it does this automatically for posts far off-screen in long topics, to save memory), the same tweet reserves its exact remembered height instead of a rough guess, so re-appearing tweets should cause less of a jump. First-time tweets still use the rough guess, since there is nothing to remember yet.
 
 ### 2026-09-28
 - **Add:** X links that Discourse did not turn into a preview by itself are now shown as full tweets too, as long as the link is on a line by itself. Links inside a sentence are left alone.
