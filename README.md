@@ -24,6 +24,9 @@ The upstream component could throw an error while a post was being displayed. Di
 
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/), written in plain language.
 
+### [Unreleased]
+- **Change:** Reduce page jumps while a tweet loads. The old link (or onebox card) now collapses smoothly instead of vanishing abruptly, and reserves more space up front when a card already shows an image or video. This should make jumps smaller and less frequent; because the real height is still not known in advance, it cannot remove them entirely.
+
 ### 2026-09-28
 - **Add:** X links that Discourse did not turn into a preview by itself are now shown as full tweets too, as long as the link is on a line by itself. Links inside a sentence are left alone.
 - **Add:** Tweets use dark mode when the forum is displayed in a dark colour scheme. This is read from the forum's own colour scheme setting; if that is missing, the background colour is used as a fallback.
