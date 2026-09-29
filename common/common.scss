@@ -29,6 +29,11 @@ a[data-x-embed][data-x-embed-media]:not([data-x-embed-stalled]):not(:has(+ .twit
 }
 
 a[data-x-embed]:has(+ .twitter-tweet-rendered) {
+  // display must be set explicitly here: once this rule takes over from the
+  // "loading" rule above, the element would otherwise fall back to its default
+  // inline display, on which max-height/overflow have no effect and it would
+  // keep the space its (now invisible) text used to take up.
+  display: block;
   max-height: 0;
   min-height: 0;
   opacity: 0;
