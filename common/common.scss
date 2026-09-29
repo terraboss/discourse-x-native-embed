@@ -28,6 +28,12 @@ a[data-x-embed][data-x-embed-media]:not([data-x-embed-stalled]):not(:has(+ .twit
   min-height: $x-embed-placeholder-height-media;
 }
 
+// A tweet embedded once before (before Discourse "cloaked" and later rebuilt
+// this post) reserves its exact remembered height instead of a guess.
+a[data-x-embed][data-x-embed-cached]:not([data-x-embed-stalled]):not(:has(+ .twitter-tweet-rendered)) {
+  min-height: var(--x-embed-cached-height);
+}
+
 a[data-x-embed]:has(+ .twitter-tweet-rendered) {
   // display must be set explicitly here: once this rule takes over from the
   // "loading" rule above, the element would otherwise fall back to its default
@@ -59,6 +65,10 @@ aside.onebox.twitterstatus[data-x-embed]:not(:has(.twitter-tweet-rendered)) {
 
 aside.onebox.twitterstatus[data-x-embed][data-x-embed-media]:not(:has(.twitter-tweet-rendered)) {
   min-height: $x-embed-placeholder-height-media;
+}
+
+aside.onebox.twitterstatus[data-x-embed][data-x-embed-cached]:not(:has(.twitter-tweet-rendered)) {
+  min-height: var(--x-embed-cached-height);
 }
 
 aside.onebox.twitterstatus[data-x-embed]:has(.twitter-tweet-rendered) {
