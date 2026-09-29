@@ -1,30 +1,73 @@
-// Height reserved for a tweet while it is loading, to reduce the layout jump
-// when it appears. Tweets vary in height; adjust to taste.
-$x-embed-placeholder-height: 12rem;
+// Height reserved while a tweet is loading, to reduce the layout jump when it
+// appears. Two tiers: a bigger one is used when we can tell in advance that the
+// tweet is likely to include an image or video (see data-x-embed-media below).
+// Still a guess — X does not tell us the real height in advance — so this only
+// reduces the jump, it cannot remove it.
+$x-embed-placeholder-height: 10rem;
+$x-embed-placeholder-height-media: 24rem;
 
-// 1) Hide the plain link once the tweet next to it has actually rendered.
-//    If X's widgets.js is blocked or fails to load, the link stays visible.
-a[data-x-embed]:has(+ .twitter-tweet-rendered) {
-  display: none;
+// Collapsing the old content abruptly (display: none) can defeat the browser's
+// own scroll anchoring, which is what normally stops the page from jumping when
+// content above the viewport changes size. Animating it instead gives the
+// browser a layout to anchor to while it happens.
+$x-embed-collapse-transition: max-height 0.25s ease, opacity 0.2s ease;
+
+// 1) The plain link above a tweet: reserve space while it loads, then collapse
+//    it smoothly once the tweet has rendered. If X's widgets.js is blocked or
+//    fails to load, data-x-embed-stalled is set and the link stays as normal.
+a[data-x-embed] {
+  transition: $x-embed-collapse-transition;
 }
 
-// 2) While the tweet is loading, reserve some space so the page jumps less.
-//    The script sets data-x-embed-stalled if nothing rendered after a while,
-//    which releases the reserved space again.
 a[data-x-embed]:not([data-x-embed-stalled]):not(:has(+ .twitter-tweet-rendered)) {
   display: block;
   min-height: $x-embed-placeholder-height;
 }
 
-// 3) Full onebox card: hide the card's own content once the tweet has rendered.
-aside.onebox.twitterstatus[data-x-embed]:has(.twitter-tweet-rendered) {
+a[data-x-embed][data-x-embed-media]:not([data-x-embed-stalled]):not(:has(+ .twitter-tweet-rendered)) {
+  min-height: $x-embed-placeholder-height-media;
+}
+
+a[data-x-embed]:has(+ .twitter-tweet-rendered) {
+  max-height: 0;
+  min-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+// 2) Full onebox card: reserve space up front (using its own size as a floor —
+//    real card content is usually already taller than our guess), then collapse
+//    the card's own content smoothly once the tweet has rendered.
+aside.onebox.twitterstatus[data-x-embed] {
   header.source,
   article.onebox-body {
-    display: none;
+    transition: $x-embed-collapse-transition;
   }
 }
 
-// 4) Dark embeds: a light edge can show around the tweet's rounded corners when
+aside.onebox.twitterstatus[data-x-embed]:not(:has(.twitter-tweet-rendered)) {
+  min-height: $x-embed-placeholder-height;
+}
+
+aside.onebox.twitterstatus[data-x-embed][data-x-embed-media]:not(:has(.twitter-tweet-rendered)) {
+  min-height: $x-embed-placeholder-height-media;
+}
+
+aside.onebox.twitterstatus[data-x-embed]:has(.twitter-tweet-rendered) {
+  header.source,
+  article.onebox-body {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+// 3) Dark embeds: a light edge can show around the tweet's rounded corners when
 //    the page (dark) and X's frame (light) disagree about the colour scheme.
 //    Telling the browser the frame is light avoids the opaque backdrop.
 .twitter-tweet-rendered iframe {
