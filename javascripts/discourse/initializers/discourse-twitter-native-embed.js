@@ -59,6 +59,52 @@ export default {
                 }
             }
 
+            // Discourse "cloaks" (removes) far-off-screen posts to save memory, then
+            // rebuilds them from scratch when scrolled back into view. That destroys
+            // our previous embed, so it has to be created again — but we already know
+            // how tall it rendered last time, so we can reserve that exact space
+            // instead of a generic guess, which avoids a second layout jump.
+            const tweetHeightCache = new Map(); // tweet path -> last known rendered height in px
+
+            function tweetKey(href) {
+                try {
+                    return new URL(href).pathname; // ignore host (x.com/twitter.com) and query string
+                } catch (e) {
+                    return href;
+                }
+            }
+
+            function applyCachedHeight(el, href) {
+                const height = tweetHeightCache.get(tweetKey(href));
+                if (height) {
+                    el.style.setProperty("--x-embed-cached-height", height + "px");
+                    el.setAttribute("data-x-embed-cached", "true");
+                }
+            }
+
+            // Watches a freshly-created placeholder and records the tweet's real
+            // height once widgets.js has finished rendering it, for next time.
+            function rememberHeightWhenRendered(container, href) {
+                try {
+                    const key = tweetKey(href);
+                    const observer = new window.MutationObserver(() => {
+                        const rendered = container.querySelector(".twitter-tweet-rendered");
+                        if (!rendered) return;
+                        const height = rendered.getBoundingClientRect().height;
+                        if (height > 0) tweetHeightCache.set(key, height);
+                        observer.disconnect();
+                    });
+                    observer.observe(container, {
+                        childList: true,
+                        subtree: true,
+                        attributes: true,
+                        attributeFilter: ["class"],
+                    });
+                } catch (e) {
+                    // ignore, non-fatal — just means this tweet's height won't be cached
+                }
+            }
+
             // https://x.com/<user>/status/<id>  (also twitter.com, www., mobile.)
             function isTweetUrl(href) {
                 try {
@@ -187,8 +233,12 @@ export default {
                         // Marker used by common/common.scss. The tweet goes next to the
                         // link (not inside it) so the link can be hidden without the tweet.
                         link.setAttribute("data-x-embed", "true");
+                        applyCachedHeight(link, link.href);
                         link.insertAdjacentElement("afterend", makeTweetBlockquote(link.href, dark));
                         watchForStall(link);
+                        if (link.parentElement) {
+                            rememberHeightWhenRendered(link.parentElement, link.href);
+                        }
                     }
 
                     // 2) Full onebox cards. common/common.scss hides the card's own content
@@ -206,7 +256,9 @@ export default {
                         if (aside.querySelector("article.onebox-body img, article.onebox-body video")) {
                             aside.setAttribute("data-x-embed-media", "true");
                         }
+                        applyCachedHeight(aside, src);
                         aside.appendChild(makeTweetBlockquote(src, dark));
+                        rememberHeightWhenRendered(aside, src);
                     }
 
                     // 3) Tweet blockquotes, i.e. X's own embed HTML pasted into a post: the
