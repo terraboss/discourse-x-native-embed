@@ -25,7 +25,8 @@ The upstream component could throw an error while a post was being displayed. Di
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/), written in plain language.
 
 ### [Unreleased]
-- **Change:** Reduce page jumps while a tweet loads. The old link (or onebox card) now collapses smoothly instead of vanishing abruptly, and reserves more space up front when a card already shows an image or video. This should make jumps smaller and less frequent; because the real height is still not known in advance, it cannot remove them entirely.
+- **Change:** Reduce page jumps while a tweet loads. The old link (or onebox card) now collapses smoothly instead of vanishing abruptly, and reserves more space up front when a card already shows an image or video. In testing this made scrolling calmer but did not fix jumps caused by older posts loading in while scrolling up in long topics — that appears to be a separate, unresolved issue in Discourse itself, unrelated to this component.
+- **Fix:** A collapsed link no longer leaves an empty gap behind.
 
 ### 2026-09-28
 - **Add:** X links that Discourse did not turn into a preview by itself are now shown as full tweets too, as long as the link is on a line by itself. Links inside a sentence are left alone.
