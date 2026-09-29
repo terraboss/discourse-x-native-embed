@@ -200,6 +200,12 @@ export default {
                         const src = safeAttr(aside, "data-onebox-src");
                         if (!src) continue;
                         aside.setAttribute("data-x-embed", "true");
+                        // A card that already shows an image/video is likely to render as a
+                        // taller tweet; common/common.scss uses this to reserve more space
+                        // up front, so the layout shifts less once the real tweet appears.
+                        if (aside.querySelector("article.onebox-body img, article.onebox-body video")) {
+                            aside.setAttribute("data-x-embed-media", "true");
+                        }
                         aside.appendChild(makeTweetBlockquote(src, dark));
                     }
 
