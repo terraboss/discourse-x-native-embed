@@ -1,0 +1,13 @@
+{
+  "name": "discourse-x-native-embed",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Dev-only tooling (tests). Discourse ignores this file; it installs the component from the Git repo directly.",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.0",
+    "sass": "^1.80.0"
+  }
+}

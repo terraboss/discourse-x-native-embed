@@ -15,12 +15,19 @@ $x-embed-placeholder-height-media: 24rem;
 // own scroll anchoring, which is what normally stops the page from jumping when
 // content above the viewport changes size. Animating it instead gives the
 // browser a layout to anchor to while it happens.
-$x-embed-collapse-transition: max-height 0.25s ease, opacity 0.2s ease;
+//
+// max-height only animates between two numbers, never from "none" — so each
+// collapsible element gets a generous finite starting value below. It is just
+// a ceiling for the animation; real content is far smaller.
+$x-embed-collapse-transition: max-height 0.25s ease, min-height 0.25s ease, opacity 0.2s ease;
+$x-embed-link-max-height: 40rem;
+$x-embed-card-max-height: 100rem;
 
 // 1) The plain link above a tweet: reserve space while it loads, then collapse
 //    it smoothly once the tweet has rendered. If X's widgets.js is blocked or
 //    fails to load, data-x-embed-stalled is set and the link stays as normal.
 a[data-x-embed] {
+  max-height: $x-embed-link-max-height;
   transition: $x-embed-collapse-transition;
 }
 
@@ -60,6 +67,7 @@ a[data-x-embed]:has(+ .twitter-tweet-rendered) {
 aside.onebox.twitterstatus[data-x-embed] {
   header.source,
   article.onebox-body {
+    max-height: $x-embed-card-max-height;
     transition: $x-embed-collapse-transition;
   }
 }
