@@ -100,6 +100,9 @@ export default {
                         attributes: true,
                         attributeFilter: ["class"],
                     });
+                    // disconnect() is safe to call again even if the callback above
+                    // already did; this just guarantees we stop watching eventually.
+                    setTimeout(() => observer.disconnect(), STALL_TIMEOUT_MS);
                 } catch (e) {
                     // ignore, non-fatal — just means this tweet's height won't be cached
                 }
@@ -124,7 +127,10 @@ export default {
                     url.hostname = "twitter.com";
                     return url.toString();
                 } catch (e) {
-                    return href.replaceAll("https://x.com", "https://twitter.com");
+                    // href should always be a valid URL here (it came from isTweetUrl() or
+                    // a server-provided onebox), so this is a last-resort fallback for the
+                    // rare malformed case — covers the x.com host variants in TWEET_HOSTS.
+                    return href.replace(/^https?:\/\/(?:www\.|mobile\.)?x\.com/i, "https://twitter.com");
                 }
             }
 
@@ -161,6 +167,9 @@ export default {
 
             // A bare URL alone in its paragraph, link text == URL: this is what Discourse
             // itself would onebox. Links inside sentences or [text](url) links are left alone.
+            // This is a heuristic, not a parse of Discourse's own oneboxing rules — it can
+            // miss edge cases, but errs on the side of under-embedding rather than embedding
+            // a link the person didn't intend as a standalone reference.
             function isStandaloneLink(link) {
                 const parent = link.parentElement;
                 if (!parent || parent.tagName !== "P") return false;
@@ -198,19 +207,23 @@ export default {
                 blockquote.classList.add("twitter-tweet");
                 const anchor = document.createElement("a");
                 anchor.setAttribute("href", toTwitterUrl(href));
-                anchor.setAttribute("rel", "nofollow");
+                anchor.setAttribute("rel", "nofollow noopener noreferrer");
                 blockquote.appendChild(anchor);
                 return blockquote;
             }
 
             // common/common.scss reserves space for a loading tweet. If the tweet never
             // renders, flag the link so that reserved space is released again.
-            function watchForStall(link) {
+            // Watches el for a rendered tweet; if none shows up within
+            // STALL_TIMEOUT_MS, marks it as stalled (so common.scss stops
+            // reserving space for it) and stops watching. isRendered is checked
+            // once, after the timeout — not on every DOM change — since this is
+            // just a one-shot give-up check, not a live status indicator.
+            function watchForStall(el, isRendered) {
                 setTimeout(() => {
                     try {
-                        const next = link.nextElementSibling;
-                        if (!(next && next.classList.contains("twitter-tweet-rendered"))) {
-                            link.setAttribute("data-x-embed-stalled", "true");
+                        if (!isRendered()) {
+                            el.setAttribute("data-x-embed-stalled", "true");
                         }
                     } catch (e) {
                         // ignore
@@ -220,7 +233,10 @@ export default {
 
             api.decorateCookedElement((el) => {
                 try {
-                    const dark = isDarkPage();
+                    // Computed lazily: most posts have nothing to embed, and
+                    // getComputedStyle() is wasted work for those.
+                    let darkResolved;
+                    const dark = () => (darkResolved ??= isDarkPage());
 
                     // 1) Links: oneboxed links, and bare links Discourse did not onebox
                     for (const link of el.querySelectorAll('a[href*="/status/"]')) {
@@ -234,8 +250,11 @@ export default {
                         // link (not inside it) so the link can be hidden without the tweet.
                         link.setAttribute("data-x-embed", "true");
                         applyCachedHeight(link, link.href);
-                        link.insertAdjacentElement("afterend", makeTweetBlockquote(link.href, dark));
-                        watchForStall(link);
+                        link.insertAdjacentElement("afterend", makeTweetBlockquote(link.href, dark()));
+                        watchForStall(link, () => {
+                            const next = link.nextElementSibling;
+                            return !!(next && next.classList.contains("twitter-tweet-rendered"));
+                        });
                         if (link.parentElement) {
                             rememberHeightWhenRendered(link.parentElement, link.href);
                         }
@@ -257,8 +276,9 @@ export default {
                             aside.setAttribute("data-x-embed-media", "true");
                         }
                         applyCachedHeight(aside, src);
-                        aside.appendChild(makeTweetBlockquote(src, dark));
+                        aside.appendChild(makeTweetBlockquote(src, dark()));
                         rememberHeightWhenRendered(aside, src);
+                        watchForStall(aside, () => !!aside.querySelector(".twitter-tweet-rendered"));
                     }
 
                     // 3) Tweet blockquotes, i.e. X's own embed HTML pasted into a post: the
@@ -271,7 +291,7 @@ export default {
                         if (!last || !isTweetUrl(last.href) || !endsWithLink(quote, last)) continue;
                         quote.classList.add("twitter-tweet");
                         quote.setAttribute("data-dnt", "true");
-                        if (dark && !quote.hasAttribute("data-theme")) {
+                        if (dark() && !quote.hasAttribute("data-theme")) {
                             quote.setAttribute("data-theme", "dark");
                         }
                     }

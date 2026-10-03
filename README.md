@@ -30,6 +30,12 @@ Format loosely follows [Keep a Changelog](https://keepachangelog.com/), written 
 - **Add:** A tweet's height is now remembered once it has rendered. If Discourse later removes and rebuilds the post (it does this automatically for posts far off-screen in long topics, to save memory), the same tweet reserves its exact remembered height instead of a rough guess, so re-appearing tweets should cause less of a jump. First-time tweets still use the rough guess, since there is nothing to remember yet.
 - **Fix:** For onebox cards, the card's own frame (border, shadow, background) stayed visible behind the rendered tweet in some posts. It's now removed along with the rest of the card once the tweet has loaded.
 
+### 2026-10-03
+- **Fix:** Onebox cards (not just plain links) now give up and release their reserved space if a tweet never loads — this case was missing before and could leave an empty gap indefinitely if X's script was blocked.
+- **Fix:** The height-tracking observer now always stops itself after a while, even for a tweet that never renders, instead of staying attached indefinitely.
+- **Fix:** A couple of x.com link variants (www., mobile.) are now handled correctly in the rare fallback path used when a link can't be parsed as a URL.
+- **Chore:** Minor robustness and performance cleanup (dark-mode detection is now skipped entirely for posts with nothing to embed; generated links carry additional standard safety attributes), prompted by a GitHub Copilot code review.
+
 ### 2026-09-28
 - **Add:** X links that Discourse did not turn into a preview by itself are now shown as full tweets too, as long as the link is on a line by itself. Links inside a sentence are left alone.
 - **Add:** Tweets use dark mode when the forum is displayed in a dark colour scheme. This is read from the forum's own colour scheme setting; if that is missing, the background colour is used as a fallback.

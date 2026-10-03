@@ -1,3 +1,8 @@
+// Several rules below use :has(), which needs Safari 15.4+ / Chrome 105+ /
+// Firefox 121+ (see the README). On an older browser, the plain link or card
+// text stays visible alongside the tweet instead of being hidden — degraded,
+// not broken.
+
 // Height reserved while a tweet is loading, to reduce the layout jump when it
 // appears. Two tiers: a bigger one is used when we can tell in advance that the
 // tweet is likely to include an image or video (see data-x-embed-media below).
@@ -59,15 +64,15 @@ aside.onebox.twitterstatus[data-x-embed] {
   }
 }
 
-aside.onebox.twitterstatus[data-x-embed]:not(:has(.twitter-tweet-rendered)) {
+aside.onebox.twitterstatus[data-x-embed]:not([data-x-embed-stalled]):not(:has(.twitter-tweet-rendered)) {
   min-height: $x-embed-placeholder-height;
 }
 
-aside.onebox.twitterstatus[data-x-embed][data-x-embed-media]:not(:has(.twitter-tweet-rendered)) {
+aside.onebox.twitterstatus[data-x-embed][data-x-embed-media]:not([data-x-embed-stalled]):not(:has(.twitter-tweet-rendered)) {
   min-height: $x-embed-placeholder-height-media;
 }
 
-aside.onebox.twitterstatus[data-x-embed][data-x-embed-cached]:not(:has(.twitter-tweet-rendered)) {
+aside.onebox.twitterstatus[data-x-embed][data-x-embed-cached]:not([data-x-embed-stalled]):not(:has(.twitter-tweet-rendered)) {
   min-height: var(--x-embed-cached-height);
 }
 
